@@ -23,12 +23,13 @@ SSL and TLS sit between the Transport and Application layers of the OSI model, w
 
 All of the source code used in this tutorial can be downloaded from the wolfSSL website, specifically from the following location. The download contains both the original and completed source code for both the echoserver and echoclient used in this tutorial. Specific contents are listed below the link.
 
-<https://www.wolfssl.com/documentation/ssl-tutorial-2.3.zip>
+<https://www.wolfssl.com/documentation/ssl-tutorial-2.5.zip>
 
 The downloaded ZIP file has the following structure:
 
 ```text
 /finished_src
+    /certs  (Certificate files)
     /echoclient (Completed echoclient code)
     /echoserver (Completed echoserver code)
     /include    (Modified unp.h)
@@ -103,39 +104,68 @@ This will install wolfSSL headers into `/usr/local/include/wolfssl` and the wolf
 A set of tests will be run on wolfCrypt and wolfSSL to verify it has been installed correctly. After a successful run of the testsuite application, you should see output similar to the following:
 
 ```text
+------------------------------------------------------------------------------
+ wolfSSL version 5.7.0
+------------------------------------------------------------------------------
+error    test passed!
+MEMORY   test passed!
+base64   test passed!
+asn      test passed!
+RANDOM   test passed!
 MD5      test passed!
 SHA      test passed!
 SHA-224  test passed!
 SHA-256  test passed!
 SHA-384  test passed!
 SHA-512  test passed!
+SHA-512/224  test passed!
+SHA-512/256  test passed!
+SHA-3    test passed!
+Hash     test passed!
 HMAC-MD5 test passed!
 HMAC-SHA test passed!
 HMAC-SHA224 test passed!
 HMAC-SHA256 test passed!
 HMAC-SHA384 test passed!
 HMAC-SHA512 test passed!
+HMAC-SHA3   test passed!
+HMAC-KDF    test passed!
+PRF         test passed!
+TLSv1.3 KDF test passed!
 GMAC     test passed!
 Chacha   test passed!
 POLY1305 test passed!
 ChaCha20-Poly1305 AEAD test passed!
 AES      test passed!
+AES192   test passed!
+AES256   test passed!
 AES-GCM  test passed!
-RANDOM   test passed!
 RSA      test passed!
 DH       test passed!
+PWDBASED test passed!
 ECC      test passed!
+logging  test passed!
+time     test passed!
+mutex    test passed!
+memcb    test passed!
+Test complete
+
+Running simple test
+SSL version is TLSv1.2
 SSL version is TLSv1.2
 SSL cipher suite is TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
-SSL version is TLSv1.2
+SSL curve name is SECP256R1
 SSL cipher suite is TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+SSL curve name is SECP256R1
 Client message: hello wolfssl!
-Server response: I hear you fa shizzle!
+I hear you fa shizzle!
+
+Running TLS test
 sending server shutdown command: quit!
 client sent quit command: shutting down!
-ciphers = DHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA:ECDHE-RSA-AES128-SHA:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES256-SHA256:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-CHACHA20-POLY1305:DHE-RSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305-OLD:ECDHE-ECDSA-CHACHA20-POLY1305-OLD:DHE-RSA-CHACHA20-POLY1305-OLD
+ciphers = TLS13-AES128-GCM-SHA256:TLS13-AES256-GCM-SHA384:TLS13-CHACHA20-POLY1305-SHA256:DHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA:ECDHE-RSA-AES128-SHA:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES256-SHA256:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-CHACHA20-POLY1305:DHE-RSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305-OLD:ECDHE-ECDSA-CHACHA20-POLY1305-OLD:DHE-RSA-CHACHA20-POLY1305-OLD
 33bc1a4570f4f1abccd5c48aace529b01a42ab51293954a297796e90d20970f0  input
-33bc1a4570f4f1abccd5c48aace529b01a42ab51293954a297796e90d20970f0  /tmp/output-N0Xq9c
+33bc1a4570f4f1abccd5c48aace529b01a42ab51293954a297796e90d20970f0  /var/folders/dy/888x7r7d6dgcqw4840l32tpw0000gp/T//testsuite-output-9Ymbuv
 
 All tests passed!
 ```
@@ -186,7 +216,7 @@ gcc -o echoserver ../lib/*.c tcpserv04.c -I ../include -lm -lwolfssl
 
 ## Headers
 
-The first thing we will need to do is include the wolfSSL native API header in both the client and the server. In the `tcpcli01.c` file for the client and the tcpserv04.c file for the server add the following line near the top:
+The first thing we will need to do is include the wolfSSL native API header in both the client and the server. In the `tcpcli01.c` file for the client and the `tcpserv04.c` file for the server add the following line near the top:
 
 ```c
 #include <wolfssl/ssl.h>
@@ -237,66 +267,68 @@ Putting these things together (library initialization, protocol selection, and C
 EchoClient:
 
 ```c
-  WOLFSSL_CTX* ctx;
+    WOLFSSL_CTX* ctx;
 
-  wolfSSL_Init();/* Initialize wolfSSL */
+    wolfSSL_Init();/* Initialize wolfSSL */
 
-  /* Create the WOLFSSL_CTX */
-  if ( (ctx = wolfSSL_CTX_new(wolfTLSv1_2_client_method())) == NULL){
-       fprintf(stderr, "wolfSSL_CTX_new error.\n");
-       exit(EXIT_FAILURE);
-  }
+    /* Create the WOLFSSL_CTX */
+    if ( (ctx = wolfSSL_CTX_new(wolfTLSv1_2_client_method())) == NULL) {
+        fprintf(stderr, "wolfSSL_CTX_new error.\n");
+        exit(EXIT_FAILURE);
+    }
 
-  /* Load CA certificates into WOLFSSL_CTX */
-  if (wolfSSL_CTX_load_verify_locations(ctx,"../certs/ca-cert.pem",0) !=
-      SSL_SUCCESS) {
-      fprintf(stderr, "Error loading ../certs/ca-cert.pem, please check
-              the file.\n");
-      exit(EXIT_FAILURE);
-  }
+    /* Load CA certificates into WOLFSSL_CTX */
+    if (wolfSSL_CTX_load_verify_locations(ctx,"../certs/ca-cert.pem",0) !=
+        SSL_SUCCESS) {
+        fprintf(stderr, "Error loading ../certs/ca-cert.pem, please check"
+            "the file.\n");
+        exit(EXIT_FAILURE);
+    }
 ```
+
+Add the above code to `tcpcli01.c` in `main()` after the variable definitions and the check that the user has started the client with an IP address.
 
 EchoServer:
 
 When loading certificates into the `WOLFSSL_CTX`, the server certificate and key file should be loaded in addition to the CA certificate. This will allow the server to send the client its certificate for identification verification:
 
 ```c
-  WOLFSSL_CTX* ctx;
+WOLFSSL_CTX* ctx;
 
-  wolfSSL_Init();  /* Initialize wolfSSL */
+wolfSSL_Init();  /* Initialize wolfSSL */
 
-  /* Create the WOLFSSL_CTX */
-  if ( (ctx = wolfSSL_CTX_new(wolfTLSv1_2_server_method())) == NULL){
-       fprintf(stderr, "wolfSSL_CTX_new error.\n");
-       exit(EXIT_FAILURE);
-  }
+/* Create the WOLFSSL_CTX */
+if ( (ctx = wolfSSL_CTX_new(wolfTLSv1_2_server_method())) == NULL) {
+    fprintf(stderr, "wolfSSL_CTX_new error.\n");
+    exit(EXIT_FAILURE);
+}
 
-  /* Load CA certificates into WOLFSSL_CTX */
-  if (wolfSSL_CTX_load_verify_locations(ctx, "../certs/ca-cert.pem", 0) !=
-           SSL_SUCCESS) {
-       fprintf(stderr, "Error loading ../certs/ca-cert.pem, "
-           "please check the file.\n");
-       exit(EXIT_FAILURE);
-  }
+/* Load CA certificates into WOLFSSL_CTX */
+if (wolfSSL_CTX_load_verify_locations(ctx, "../certs/ca-cert.pem", 0) !=
+         SSL_SUCCESS) {
+    fprintf(stderr, "Error loading ../certs/ca-cert.pem, "
+        "please check the file.\n");
+    exit(EXIT_FAILURE);
+}
 
 /* Load server certificates into WOLFSSL_CTX */
-  if (wolfSSL_CTX_use_certificate_file(ctx,"../certs/server-cert.pem",
-        SSL_FILETYPE_PEM) != SSL_SUCCESS){
-      fprintf(stderr, "Error loading ../certs/server-cert.pem, please
-        check the file.\n");
-      exit(EXIT_FAILURE);
-  }
+if (wolfSSL_CTX_use_certificate_file(ctx,"../certs/server-cert.pem",
+        SSL_FILETYPE_PEM) != SSL_SUCCESS) {
+    fprintf(stderr, "Error loading ../certs/server-cert.pem, please"
+        "check the file.\n");
+    exit(EXIT_FAILURE);
+}
 
-  /* Load keys */
-  if (wolfSSL_CTX_use_PrivateKey_file(ctx,"../certs/server-key.pem",
-        SSL_FILETYPE_PEM) != SSL_SUCCESS){
-      fprintf(stderr, "Error loading ../certs/server-key.pem, please check
-        the file.\n");
-      exit(EXIT_FAILURE);
-  }
+/* Load keys */
+if (wolfSSL_CTX_use_PrivateKey_file(ctx,"../certs/server-key.pem",
+        SSL_FILETYPE_PEM) != SSL_SUCCESS) {
+    fprintf(stderr, "Error loading ../certs/server-key.pem, please check"
+        "the file.\n");
+    exit(EXIT_FAILURE);
+}
 ```
 
-The code shown above should be added to the beginning of `tcpcli01.c` and `tcpserv04.c`, after both the variable definitions and the check that the user has started the client with an IP address (client). A version of the finished code is included in the SSL tutorial ZIP file for reference.
+The code shown above should be added to the beginning of `tcpserv04.c` after the variable definitions in `main()`. A version of the finished code is included in the SSL tutorial ZIP file for reference.
 
 Now that wolfSSL and the `WOLFSSL_CTX` have been initialized, make sure that the `WOLFSSL_CTX` object and the wolfSSL library are freed when the application is completely done using SSL/TLS. In both the client and the server, the following two lines should be placed at the end of the `main()` function (in the client right before the call to `exit()`):
 
@@ -348,21 +380,7 @@ if ( (ssl = wolfSSL_new(ctx)) == NULL) {
 wolfSSL_set_fd(ssl, connfd);
 ```
 
-A WOLFSSL object needs to be created after each TCP Connect and the socket file descriptor needs to be associated with the session.
-
-Create a new WOLFSSL object using the [`wolfSSL_new()`](group__Setup.md#function-wolfssl_new) function. This function returns a pointer to the `WOLFSSL` object if successful or `NULL` in the case of failure. We can then associate the socket file descriptor (`sockfd`) with the new `WOLFSSL` object (`ssl`):
-
-```c
-/* Create WOLFSSL object */
-WOLFSSL* ssl;
-
-if( (ssl = wolfSSL_new(ctx)) == NULL) {
-    fprintf(stderr, "wolfSSL_new error.\n");
-    exit(EXIT_FAILURE);
-}
-
-wolfSSL_set_fd(ssl, sockfd);
-```
+Again, a WOLFSSL object needs to be created after each TCP Connect and the socket file descriptor needs to be associated with the session.
 
 ## Sending/Receiving Data
 
@@ -382,7 +400,7 @@ str_cli(stdin, ssl);
 
 Inside the `str_cli()` function, `Writen()` and `Readline()` are replaced with calls to [`wolfSSL_write()`](group__IO.md#function-wolfssl_write) and [`wolfSSL_read()`](group__IO.md#function-wolfssl_read) functions, and the `WOLFSSL` object (`ssl`) is used instead of the original file descriptor(`sockfd`). The new `str_cli()` function is shown below. Notice that we now need to check if our calls to [`wolfSSL_write`](group__IO.md#function-wolfssl_write) and [`wolfSSL_read`](group__IO.md#function-wolfssl_read) were successful.
 
-The authors of the Unix Programming book wrote error checking into their `Writen()` function which we must make up for after it has been replaced. We add a new int variable, `n`, to monitor the return value of [`wolfSSL_read`](group__IO.md#function-wolfssl_read) and before printing out the contents of the buffer, recvline, the end of our read data is marked with a `\0`:
+The authors of the Unix Programming book wrote error checking into their `Writen()` function which we must make up for after it has been replaced. We add a new int variable, `n`, to monitor the return value of [`wolfSSL_read`](group__IO.md#function-wolfssl_read) and before printing out the contents of the buffer, `recvline`, the end of our read data is marked with a `\0`:
 
 ```c
 void
@@ -464,7 +482,7 @@ We will free the `ctx` and cleanup before the call to exit.
 
 In the echoclient and echoserver, we will need to add a signal handler for when the user closes the app by using “Ctrl+C”. The echo server is continually running in a loop. Because of this, we need to provide a way to break that loop when the user presses “Ctrl+C”. To do this, the first thing we need to do is change our loop to a while loop which terminates when an exit variable (cleanup) is set to true.
 
-First, define a new static int variable called cleanup at the top of `tcpserv04.c` right after the `#include` statements:
+First, define a new static int variable called `cleanup` at the top of `tcpserv04.c` right after the `#include` statements:
 
 ```c
 static int cleanup;  /* To handle shutdown */
