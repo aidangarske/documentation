@@ -212,6 +212,11 @@ By default, wolfProvider only builds a shared library, with building of a static
 | --enable-usersettings | **Disabled** | Use your own user_settings.h and do not add Makefile CFLAGS |
 | --enable-dynamic | **Enabled** | Enable loading wolfProvider as a dynamic provider |
 | --enable-singlethreaded | **Disabled** | Enable wolfProvider single threaded |
+| --enable-pqc | **Disabled** | Enable ML-KEM, ML-DSA and SLH-DSA (FIPS 203/204/205) |
+| --enable-mlkem | **Disabled** | Enable ML-KEM (FIPS 203) only |
+| --enable-mldsa | **Disabled** | Enable ML-DSA (FIPS 204) only |
+| --enable-slhdsa | **Disabled** | Enable SLH-DSA (FIPS 205) only |
+| --enable-lms | **Disabled** | Enable LMS verification only |
 | | | |
 | --with-openssl=DIR |   | OpenSSL installation location to link against. If not set, use the system default library and include paths. |
 | --with-wolfssl=DIR |   | wolfSSL installation location to link against. If not set, use the system default library and include paths. |
@@ -252,8 +257,11 @@ wolfProvider exposes several preprocessor defines that allow users to configure 
 | WP_HAVE_HKDF | HKDF (HMAC-based Key Derivation Function) support |
 | WP_HAVE_HMAC | HMAC (Hash-based Message Authentication Code) support |
 | WP_HAVE_KRB5KDF | Kerberos 5 Key Derivation Function support |
+| WP_HAVE_LMS | LMS (RFC 8554 / SP 800-208) verification support |
 | WP_HAVE_MD5 | MD5 hash algorithm support |
 | WP_HAVE_MD5_SHA1 | MD5+SHA1 combination support |
+| WP_HAVE_MLDSA | ML-DSA (FIPS 204) post-quantum signature support |
+| WP_HAVE_MLKEM | ML-KEM (FIPS 203) post-quantum key encapsulation support |
 | WP_HAVE_PBE | Password-Based Encryption support |
 | WP_HAVE_RANDOM | Random number generation support |
 | WP_HAVE_RSA | RSA encryption and signature support |
@@ -270,6 +278,7 @@ wolfProvider exposes several preprocessor defines that allow users to configure 
 | WP_HAVE_SHA512_224 | SHA512/224 hash algorithm support |
 | WP_HAVE_SHA512_256 | SHA512/256 hash algorithm support |
 | WP_HAVE_SHAKE_256 | SHAKE256 extendable output function support |
+| WP_HAVE_SLHDSA | SLH-DSA (FIPS 205) post-quantum signature support |
 | WP_HAVE_TLS1_PRF | TLS1 Pseudo-Random Function support |
 | WP_HAVE_X25519 | X25519 elliptic curve support |
 | WP_HAVE_X448 | X448 elliptic curve support |
