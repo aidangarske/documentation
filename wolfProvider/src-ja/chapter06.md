@@ -2,6 +2,18 @@
 
 wolfProviderは、関連するwolfCryptおよびOpenSSLライブラリの移植性を活用するように設計しています。
 
+## 対応プラットフォーム
+
+wolfProviderはクロスプラットフォームであり、wolfSSLおよびOpenSSLがサポートする主要なプラットフォーム上でビルドできます。
+対応プラットフォームは以下の通りです。
+
+* Linuxおよびその他の*nix系システム。autoconfシステムを使用してビルドします([wolfProviderのビルド](chapter03.md)を参照)
+* macOS
+* Windows。`libwolfprov.dll`をビルドするVisual Studio 2022ソリューションを使用します([wolfProviderのビルド](chapter03.md)を参照)
+* Windows CE
+
+これらのプラットフォームでは、FIPSビルドと非FIPSビルドの両方をサポートしています。
+
 ## スレッド対応
 
 wolfProviderはスレッドセーフであり、必要に応じてwolfCryptのミューテックスロックメカニズム`wc_LockMutex()`、`wc_UnLockMutex()`を使用します。

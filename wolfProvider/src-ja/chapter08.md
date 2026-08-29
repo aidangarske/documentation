@@ -19,6 +19,7 @@ wolfProviderは次のソースファイルで構成され、すべてwolfProvide
 | wp_dh_kmgmt.c | wolfProvider DH 鍵管理実装 |
 | wp_digests.c | wolfProvider メッセージ ダイジェスト実装 (SHA-1、SHA-2、SHA-3、...)|
 | wp_drbg.c | wolfProvider DRBG (決定論的乱数ビット ジェネレーター) 実装|
+| wp_seed_src.c | フォークセーフなエントロピーのための /dev/urandom キャッシュを用いた wolfProvider SEED-SRC エントロピーソース実装|
 | wp_ecc_kmgmt.c | wolfProvider ECC キー管理実装|
 | wp_ecdh_exch.c | wolfProvider ECDH キー交換実装|
 | wp_ecdsa_sig.c | wolfProvider ECDSA 署名実装|
@@ -38,10 +39,20 @@ wolfProviderは次のソースファイルで構成され、すべてwolfProvide
 | wp_mac_sig.c | wolfProvider MAC 署名実装|
 | wp_params.c | wolfProvider パラメータ処理実装|
 | wp_pbkdf2.c | wolfProvider PBKDF2 (パスワードベースのキー導出関数 2) 実装|
+| wp_sshkdf.c | wolfProvider SSHKDF (SSH 鍵導出関数) 実装|
 | wp_rsa_asym.c | wolfProvider RSA 非対称暗号化実装|
 | wp_rsa_kem.c | wolfProvider RSA KEM (キーカプセル化メカニズム) 実装|
 | wp_rsa_kmgmt.c | wolfProvider RSA キー管理実装|
 | wp_rsa_sig.c | wolfProvider RSA 署名実装|
+| wp_mlkem_kmgmt.c | wolfProvider ML-KEM (FIPS 203) キー管理実装|
+| wp_mlkem_kem.c | wolfProvider ML-KEM (FIPS 203) 鍵カプセル化実装|
+| wp_mlx_kmgmt.c | wolfProvider ハイブリッド ML-KEM + ECDH キー管理実装|
+| wp_mlx_kem.c | wolfProvider ハイブリッド ML-KEM + ECDH 鍵カプセル化実装|
+| wp_mldsa_kmgmt.c | wolfProvider ML-DSA (FIPS 204) キー管理実装|
+| wp_mldsa_sig.c | wolfProvider ML-DSA (FIPS 204) 署名実装|
+| wp_slhdsa_kmgmt.c | wolfProvider SLH-DSA (FIPS 205) キー管理実装|
+| wp_slhdsa_sig.c | wolfProvider SLH-DSA (FIPS 205) 署名実装|
+| wp_lms.c | wolfProvider LMS (RFC 8554) 検証実装|
 | wp_tls1_prf.c | wolfProvider TLS 1.0 PRF 実装|
 | wp_tls_capa.c | wolfProvider TLS 機能の実装 |
 

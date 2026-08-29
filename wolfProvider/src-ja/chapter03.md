@@ -12,6 +12,7 @@ wolfProviderパッケージは、以下のように構成しています。
 
 ```
 certs/                      (ユニットテストで使用されるテスト用証明書、鍵)
+docs/                       (インテグレーションガイドおよびFIPSインテグレーションガイド)
 examples/                   (実装例)
 include/
     wolfprovider/           (wolfProviderヘッダーファイル)
@@ -39,13 +40,13 @@ user_settings.h             (user_settings.hサンプル)
 スクリプトを呼び出す前に、各種環境変数を設定する方法:
 
 ```
-OPENSSL_TAG=openssl-3.2.0 WOLFSSL_TAG=v5.7.2-stable WOLFPROV_DEBUG=1 ./scripts/build-wolfprovider.sh
+OPENSSL_TAG=openssl-3.5.0 WOLFSSL_TAG=v5.9.2-stable WOLFPROV_DEBUG=1 ./scripts/build-wolfprovider.sh
 ```
 
 スクリプトの引数として指定する方法：
 
 ```
-./scripts/build-wolfprovider.sh --openssl-ver=openssl-3.2.0 --wolfssl-ver=v5.7.2-stable --debug
+./scripts/build-wolfprovider.sh --openssl-ver=openssl-3.5.0 --wolfssl-ver=v5.9.2-stable --debug
 ```
 
 これらの方法を組み合わせて、目的のビルドの組み合わせを実現することもできます。
@@ -236,6 +237,25 @@ Visual StudioでwolfProviderプロジェクトをロードします。
 この実行可能ファイルに`--help`の引数をつけて実行すると、オプションの一覧を表示できます。 
 wolfProviderを静的エンジンとして使用するには`--static`を付けて実行する必要があります。
 
+## Windows上でのビルド (Visual Studio)
+
+wolfProviderには、`IDE/WINVS/wolfprovider.sln` にVisual Studio 2022ソリューションが含まれており、wolfSSLをバックエンドとするOpenSSL 3.xプロバイダーである **`libwolfprov.dll`** をビルドします。
+DLL名は重要です。`-provider libwolfprov` は `libwolfprov.dll` に解決されます。
+Windows上では`configure`ステップはなく、wolfSSLは`user_settings.h`を介して構成します。
+
+前提条件:
+
+* C++ツールセット (v143) およびMASM (`ml64.exe`) を含むVisual Studio 2022
+* OpenSSLをビルドするためのPerl、NASM、git（Strawberry PerlにはNASMが含まれています）
+
+このソリューションは4つのx64構成を提供します。
+`DLL Release` と `DLL Debug` は、実際に配布されるプロバイダー (`libwolfprov.dll`) をビルドします。
+`Static Release` と `Static Debug` は、単体テストを実行するための `unit-test.exe` をビルドします
+（OpenSSLは`LoadLibraryA`でプロバイダーをロードしてから`OSSL_provider_init`を探すため、静的ライブラリはプロバイダーとして動作できません）。
+wolfProvider、wolfSSL、OpenSSLは同じ階層に並べて配置されていることを前提としています。
+パスは`wolfprovider.props`で設定されており、コマンドラインから上書きできます（例: `/p:wolfCryptDir=D:\wolfssl`）。
+非FIPS版・FIPS版いずれのwolfSSLビルドもサポートしています。
+
 ## ビルドオプション (./configure に指定するオプション)
 
 ライブラリの構築方法をカスタマイズするために`./configure`スクリプトに追加できるオプションを以下に示します。
@@ -261,7 +281,10 @@ wolfProviderを静的エンジンとして使用するには`--static`を付け�
 | --enable-usersettings | **無効** | user_settings.h を使用し、MakefileのCFLAGSを使用しない |
 | --enable-dynamic | 有効 | wolfProviderをダイナミックプロバイダーとしてロードできるようにする |
 | --enable-singlethreaded | **無効** | wolfProviderをシングルスレッド環境で使用する |
-| --enable-pqc | **無効** | ポスト量子アルゴリズム (ML-KEM、ML-DSA、SLH-DSA) をすべて有効にする |
+| --enable-debug-silent | **無効** | デバッグログをコンパイルには含めるが、実行時に WOLFPROV_LOG_LEVEL / WOLFPROV_LOG_COMPONENTS で有効化するまで出力を抑制する |
+| --enable-replace-default | **無効** | wolfProviderがOpenSSLのデフォルトプロバイダーとなるよう、置き換え用デフォルトプロバイダーをビルドする (CFLAGSに -DWOLFPROV_REPLACE_DEFAULT を指定することでも有効化可能) |
+| --enable-seed-src | **無効** | フォークセーフなエントロピーのために、/dev/urandom キャッシュを使用する SEED-SRC エントロピーソースを有効にする |
+| --enable-pqc | **無効** | ML-KEM、ML-DSA、SLH-DSA (FIPS 203/204/205) を有効にする。wolfSSL master/v5.9.2以降およびOpenSSL 3.6以降が必要 |
 | --enable-mlkem | **無効** | ML-KEM (FIPS 203) のみを有効にする |
 | --enable-mldsa | **無効** | ML-DSA (FIPS 204) のみを有効にする |
 | --enable-slhdsa | **無効** | SLH-DSA (FIPS 205) のみを有効にする |
@@ -306,6 +329,7 @@ wolfProviderは、お客様がwolfProviderのビルド方法を設定できる�
 | WP_HAVE_GMAC | GMAC (ガロア/カウンターモード認証) を有効化 |
 | WP_HAVE_HKDF | HKDF (HMACベースの鍵導出関数) を有効化 |
 | WP_HAVE_HMAC | HMAC (ハッシュベースのメッセージ認証コード) を有効化 |
+| WP_HAVE_KBKDF | KBKDF (鍵ベースの鍵導出関数) を有効化 |
 | WP_HAVE_KRB5KDF | Kerberos 5 鍵導出関数を有効化 |
 | WP_HAVE_LMS | LMS (RFC 8554 / SP 800-208) 検証を有効化 |
 | WP_HAVE_MD5 | MD5 ハッシュアルゴリズムを有効化 |
@@ -315,6 +339,7 @@ wolfProviderは、お客様がwolfProviderのビルド方法を設定できる�
 | WP_HAVE_PBE | パスワードベースの暗号化を有効化 |
 | WP_HAVE_RANDOM | 乱数生成を有効化 |
 | WP_HAVE_RSA | RSA 暗号化と署名を有効化 |
+| WP_HAVE_SEED | SEED-SRC エントロピーソースを有効化 |
 | WP_HAVE_SHA1 | SHA1 ハッシュアルゴリズムを有効化 |
 | WP_HAVE_SHA224 | SHA224 ハッシュアルゴリズムを有効化 |
 | WP_HAVE_SHA256 | SHA256 ハッシュアルゴリズムを有効化 |
@@ -328,6 +353,7 @@ wolfProviderは、お客様がwolfProviderのビルド方法を設定できる�
 | WP_HAVE_SHA512_224 | SHA512/224 ハッシュアルゴリズムを有効化 |
 | WP_HAVE_SHA512_256 | SHA512/256 ハッシュアルゴリズムを有効化 |
 | WP_HAVE_SHAKE_256 | SHAKE256 拡張出力関数を有効化 |
+| WP_HAVE_SSHKDF | SSHKDF (SSH 鍵導出関数) を有効化 |
 | WP_HAVE_SLHDSA | SLH-DSA (FIPS 205) ポスト量子署名を有効化 |
 | WP_HAVE_TLS1_PRF | TLS1 擬似乱数関数を有効化 |
 | WP_HAVE_X25519 | X25519 楕円曲線を有効化 |

@@ -37,7 +37,7 @@ wolfProviderは以下のログ出力レベルをサポートします。
 ret = PROVIDER_ctrl_cmd(e, “log_level”, WP_LOG_ERROR | WP_LOG_INFO,
 NULL, NULL, 0);
 if (ret != 1) {
-    printf(“Failed to set logging level\n”);
+    printf("Failed to set logging level\n");
 }
 ```
 
@@ -71,7 +71,7 @@ wolfProviderでは、コンポーネントごとにログを出力できます�
 ret = PROVIDER_ctrl_cmd(e, “log_components”, WP_LOG_DIGEST | WP_LOG_CIPHER,
 NULL, NULL, 0);
 if (ret != 1) {
-    printf(“Failed to set log components\n”);
+    printf("Failed to set log components\n");
 }
 ```
 
@@ -80,7 +80,7 @@ if (ret != 1) {
 デフォルトでは、wolfProviderは **fprintf()** を使用してデバッグログメッセージを **stderr** に出力します。
 
 ログメッセージの出力方法や出力場所を変更したい場合は、カスタムログ出力コールバック関数を記述してwolfProviderに登録します。 
-その際、`include/wolfprovider/wp_logging.h`に示す`wolfProvider_Logging_cb`のプロトタイプ宣言と一致させる必要があります。
+その際、`include/wolfprovider/wp_logging.h`に示す`wolfProv_Logging_cb`のプロトタイプ宣言と一致させる必要があります。
 
 ```
 /**
@@ -89,7 +89,7 @@ if (ret != 1) {
 * component - [IN] - Component that log message is coming from
 * logMessage - [IN] - Log message
 */
-typedef void (*wolfProvider_Logging_cb)(const int logLevel, const int component, const char *const logMessage);
+typedef void (*wolfProv_Logging_cb)(const int logLevel, const int component, const char *const logMessage);
 ```
 
 その後、"**set_logging_cb**"エンジン制御コマンドを使用して、コールバック関数をwolfProviderに登録できます。 
@@ -102,7 +102,7 @@ const char* const logMessage)
 {
     (void)logLevel;
     (void)component;
-    fprintf(stderr, “wolfProvider log message: %d\n”, logMessage);
+    fprintf(stderr, "wolfProvider log message: %s\n", logMessage);
 }
 
 int main (void)
@@ -110,7 +110,7 @@ int main (void)
     int ret;
     PROVIDER* e;
 ...
-    ret = PROVIDER_ctrl_cmd(e, “set_logging_cb”, 0, NULL, (void(*)(void))my_Logging_cb, 0);
+    ret = PROVIDER_ctrl_cmd(e, “set_logging_cb”, 0, NULL, (void(*)(void))customLogCallback, 0);
     if (ret != 1) {
         /* failed to set logging callback */
     }

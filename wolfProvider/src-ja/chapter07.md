@@ -71,3 +71,20 @@ wolfProviderをロードできます。
 #include <wolfprovider/wp_wolfprovider.h>
 wolfssl_provider_init(const OSSL_CORE_HANDLE* handle, const OSSL_DISPATCH* in, const OSSL_DISPATCH** out, void** provCtx);
 ```
+
+## 置き換え用デフォルトモード
+
+wolfProviderは、OpenSSLのデフォルトプロバイダーと並行してロードされるのではなく、それを*置き換える*形でビルドすることができます。
+置き換え用デフォルトモードでは、`default`、`fips`、`wolfProvider` のいずれのプロバイダーへのOpenSSL側の要求もすべてwolfProviderに解決されるため、
+アプリケーションはコードや構成を変更することなくwolfSSLの暗号処理を使用でき、OpenSSLネイティブの暗号処理へのフォールバックも発生しません。
+
+ビルド時には、configureオプション `--enable-replace-default`、`scripts/build-wolfprovider.sh` の引数 `--replace-default`、
+または `CFLAGS` に `-DWOLFPROV_REPLACE_DEFAULT` を定義することで有効化できます(Yocto系のビルドで有用です)。
+このモード向けにOpenSSLをビルドすると、OpenSSLの `crypto/provider_predefined.c` が置き換えられ、デフォルトプロバイダーがwolfProviderによってバックエンドされるようになります。
+
+置き換え用デフォルトモードでは、wolfProviderがすでにデフォルトプロバイダーとなっているため、`OPENSSL_CONF` や `OPENSSL_MODULES` の構成は不要です。
+`scripts/env-setup` ヘルパーはこのモードを自動的に検出し、これらの環境変数の設定をスキップします。
+
+置き換え用デフォルトモードは、FIPS環境への展開において推奨されます。
+FIPS認証はシステム全体に適用されるため、このモデルによってアプリケーションが誤って非FIPSのデフォルトプロバイダーを使用してしまうことがなくなります。
+詳細については、FIPS 140-3のサポートの章およびwolfProvider FIPSインテグレーションガイドをご参照ください。
