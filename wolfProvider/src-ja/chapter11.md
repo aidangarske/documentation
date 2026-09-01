@@ -25,9 +25,8 @@ ML-KEMは、鍵生成、カプセル化、デカプセル化、raw鍵のイン�
 ML-DSAは、鍵生成、pure署名およびpre-hash署名、検証、コンテキスト文字列、鍵エンコードをサポートします。
 SLH-DSAは、鍵生成、pure署名、検証、コンテキスト文字列、鍵エンコードをサポートします。
 LMSは、公開鍵のインポートとワンショットの署名検証のみをサポートします。
-秘密鍵のインポート、署名、鍵生成は公開されていません。これは、OpenSSL 3.6のプロバイダーABIがLMSを検証専用として定義しているためです。
-すなわち、wolfCrypt自体はこれらの機能をサポートしているものの、wolfProviderが実装すべき署名、鍵生成、秘密鍵インポート用のエントリポイントは提供されません。
-これにより、LMSの葉ノード使用(ワンタイム署名)状態を強制できないインターフェース経由でステートフルな秘密鍵操作を公開してしまうことも回避しています。
+秘密鍵のインポート、署名、鍵生成は公開しません。これは検証専用であるOpenSSLのLMS鍵タイプ契約に従うとともに、wolfProviderが意図的に選択した設計です。
+wolfCrypt自体はLMS署名と鍵生成をサポートしていますが、LMSの葉ノード使用(ワンタイム署名)状態を強制できないインターフェースを通じて、ステートフルなLMS秘密鍵操作を公開することを回避します。
 
 ## プロバイダーアーキテクチャ
 
@@ -108,10 +107,12 @@ wolfProviderはネイティブのwolfCrypt実装を呼び出すため、プロ�
 
 ## ビルド
 
+ポスト量子アルゴリズムにはOpenSSL 3.6以降が必要です。古いデフォルトを使用しないよう、`OPENSSL_TAG`には最新のパッチ適用済みOpenSSL 3.6.xリリースを指定してください(既知の脆弱性がある3.6.0は使用しないでください)。
+
 ビルドスクリプトを使用すると、OpenSSL、wolfSSL、wolfProviderをまとめて構成できます。
 
 ```sh
-./scripts/build-wolfprovider.sh --enable-pqc
+OPENSSL_TAG=openssl-3.6.2 ./scripts/build-wolfprovider.sh --enable-pqc
 ```
 
 `--enable-pqc` はML-KEM、ML-DSA、SLH-DSAを有効にします。LMSは独立したオプションのままであり、各ファミリーを個別に選択することもできます。
@@ -126,13 +127,15 @@ wolfProviderはネイティブのwolfCrypt実装を呼び出すため、プロ�
 手動でビルドする場合は、対応するアルゴリズムオプションを指定してwolfSSLを構成した後、wolfProviderを構成します。
 
 ```sh
-# Add the required options to the normal wolfSSL configuration.
+# wolfSSLソースディレクトリで、通常のwolfSSL構成に必要なオプションを追加します。
+cd /path/to/wolfssl
 ./configure --enable-mlkem --enable-mldsa --enable-slhdsa=yes,sha2 \
     --enable-lms=verify-only,sha256-192,shake256
 make
 sudo make install
 
-# Configure wolfProvider against OpenSSL 3.6 or later.
+# wolfProviderソースディレクトリで、OpenSSL 3.6以降を指定して構成します。
+cd /path/to/wolfProvider
 ./configure --enable-pqc --enable-lms \
     --with-openssl=/path/to/openssl \
     --with-wolfssl=/path/to/wolfssl
@@ -152,7 +155,7 @@ LMSの署名と鍵生成をコンパイルして未使用のままにするの�
 これにより、wolfProviderがOpenSSLのデフォルトとなり、操作が気付かないうちにOpenSSL組み込みのプロバイダーにフォールバックすることを防ぎます。
 
 ```sh
-./scripts/build-wolfprovider.sh --replace-default \
+OPENSSL_TAG=openssl-3.6.2 ./scripts/build-wolfprovider.sh --replace-default \
     --enable-pqc --enable-lms
 ```
 
@@ -173,9 +176,7 @@ wolfProviderがOpenSSLのモジュール検索パス外にインストールさ�
 export OPENSSL_MODULES=/path/to/wolfprovider/lib
 ```
 
-構成を有効にした状態でコマンドを実行します。
-これにより、構成されたプロバイダーが通知するアルゴリズムを確認できますが、標準プロバイダーモードにおいて、
-関係のない操作がOpenSSLのデフォルトプロバイダーから選択されないことを保証するものではありません。
+構成を有効にした状態でコマンドを実行します。この構成では`libwolfprov`のみを有効化するため、OpenSSLは自身のデフォルトプロバイダーを暗黙に有効化しません。したがって、アプリケーションがデフォルトプロバイダーも有効化する場合(または置き換え用デフォルトモードを使用する場合)を除き、wolfProviderがサポートしない操作は暗黙にフォールバックせず失敗します。
 
 ```sh
 OPENSSL_CONF=/path/to/wolfProvider/provider.conf \
@@ -194,7 +195,7 @@ OPENSSL_CONF=/path/to/wolfProvider/provider.conf \
 - ML-DSA-65の鍵生成、署名、検証
 - SLH-DSA-SHA2-128fの鍵生成、署名、検証
 
-この例は、wolfProviderがいずれかのPQCファミリーで構成されている場合、`make check` によってビルドおよび実行されます。
+この例は、wolfProviderがいずれかのPQCファミリーで構成されている場合に、Automakeテストではなく`noinst_PROGRAMS`ターゲットとしてビルドされます。wolfProviderのCIは、`make check`の一部ではなく別のステップとして実行します。
 コンパイル時のガードにより有効化されたファミリーのみが実行されるため、同じソースコードでML-KEMのみ、ML-DSAのみ、SLH-DSAのみのビルドも実演できます。
 ビルド後は、wolfProviderのルートディレクトリから直接実行することもできます。
 
@@ -245,11 +246,13 @@ wolfCrypt Post Quantum v7.0.0実装は、[証明書A8437](https://csrc.nist.gov/
 CAVPはアルゴリズム実装を検証するものです。FIPS 140-3に基づく完全な暗号モジュールの検証とは別物であるため、
 オープンソース版やFIPS Ready版のwolfSSLビルドを使用するだけでは、FIPS検証済みアプリケーションにはなりません。
 
+検証済みFIPSビルドとFIPS Readyビルドは現在、PQC(ML-KEM、ML-DSA、SLH-DSA)およびLMSを拒否します。モジュール固有のCAST統合が完了するまで、FIPSまたはFIPS Ready版wolfSSLとこれらのアルゴリズムを組み合わせる構成はサポートされません。その統合が利用可能になるまでは、PQCとLMSを非FIPS版wolfSSLビルドでのみ使用してください。この制限は`scripts/build-wolfprovider.sh`によって適用されます。手動で実行した`./configure`は現在この組み合わせを拒否しないため、FIPSビルドではビルドスクリプトを使用するか、この組み合わせを避けてください。
+
 PQCには、複数の独立したテスト層があります。
 
 - 単体テストおよびサンプルテストは、鍵生成、インポート/エクスポート、エンコード、カプセル化、デカプセル化、署名、検証、不正な入力、
   および該当する場合はX.509操作をカバーします。LMSの単体テストは特に、raw形式の公開鍵のインポート/エクスポート、XDRデコード、
-  selectionの処理、不正な入力、およびサポート対象外のステートフルな操作の拒否をカバーします。
+  `selection`の処理、不正な入力、およびサポート対象外のステートフルな操作の拒否をカバーします。
 - OpenSSL EVPの既知解テストは、ML-KEM、ML-DSA、SLH-DSA、LMSの各ベクターファイルをwolfProviderに対して実行します。
   LMSベクターには320件の検証ケースが含まれます。
 - PQC相互運用性テストは、wolfProviderとOpenSSLのデフォルトプロバイダー、および直接のwolfSSL APIを比較します。

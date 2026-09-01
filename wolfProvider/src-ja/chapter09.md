@@ -109,7 +109,7 @@ export CPPFLAGS="-I/path/to/openssl/install/include"
 * OpenSSL 3.xの幅広いリリース (3.0.6から最新の3.xリリースまで)
 * wolfSSL masterおよび複数の安定版リリース (例: v5.9.1、v5.8.4)
 * 標準モードおよび置き換え用デフォルトプロバイダーモードの両方
-* FIPSビルドおよび非FIPSビルド (FIPSはJenkinsパイプラインによる追加検証も実施)
+* FIPSビルドおよび非FIPSビルド(FIPSは専用のFIPSおよびFIPS Ready GitHub Actionsワークフローでも追加検証)
 * wolfProviderの暗号処理が実際に実行されていることを確認するための障害テスト (`WOLFPROV_FORCE_FAIL=1`)
 * アドレスサニタイザーおよび未定義動作サニタイザー、静的解析、ポスト量子既知解テスト (KAT)
 
